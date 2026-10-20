@@ -1,0 +1,348 @@
+<title>AI EasyMaker 요점정리</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sticky toolbar (search, hide-answers, section chips) over one reading column of term→answer rows, grouped by exam domain */
+:root {
+  --bg: #f6f8fa;
+  --surface: #ffffff;
+  --fg: #17212b;
+  --muted: #5b6875;
+  --line: #dde3e9;
+  --accent: #1d5f8a;
+  --accent-soft: #e3eef6;
+  --warn: #9a5b00;
+  --warn-soft: #fdf1dc;
+  --mask: #d5dde4;
+  --font-body: "IBM Plex Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", Consolas, "D2Coding", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11171d; --surface: #182129; --fg: #e3e9ef; --muted: #98a6b3; --line: #2a3640;
+    --accent: #7db8e0; --accent-soft: #1d3446; --warn: #f0b860; --warn-soft: #3a2c14; --mask: #2c3943;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11171d; --surface: #182129; --fg: #e3e9ef; --muted: #98a6b3; --line: #2a3640;
+  --accent: #7db8e0; --accent-soft: #1d3446; --warn: #f0b860; --warn-soft: #3a2c14; --mask: #2c3943;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.6; }
+.wrap { max-width: 980px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header.top { padding-block: 28px 8px; }
+header.top h1 { font-size: 26px; margin: 0 0 4px; text-wrap: balance; letter-spacing: -0.01em; }
+header.top p { margin: 0; color: var(--muted); }
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+.bar .wrap { padding-block: 10px; display: flex; flex-direction: column; gap: 8px; }
+.controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+#q { flex: 1 1 220px; min-width: 0; font: inherit; padding: 8px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--fg); }
+#q:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button { font: inherit; font-size: 14px; padding: 7px 12px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer; }
+button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+#count { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: thin; }
+.chips a { flex: none; font-size: 13px; text-decoration: none; color: var(--accent); background: var(--accent-soft); padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+main { padding-block: 16px 64px; display: flex; flex-direction: column; gap: 36px; }
+section h2 { font-size: 20px; margin: 0 0 4px; display: flex; align-items: baseline; gap: 10px; scroll-margin-top: 120px; }
+section h2 small { font-size: 13px; font-weight: 400; color: var(--muted); font-variant-numeric: tabular-nums; }
+section > .lead { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+h3 { font-size: 13px; letter-spacing: 0.06em; color: var(--accent); margin: 18px 0 6px; font-weight: 700; }
+dl { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+.row { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 4px 20px; padding: 10px 14px; border-top: 1px solid var(--line); }
+.row:first-child { border-top: 0; }
+dt { font-weight: 500; min-width: 0; }
+dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+dd b { color: var(--accent); }
+code { font-family: var(--font-mono); font-size: 13px; background: var(--accent-soft); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+.note { display: inline-block; margin-top: 4px; font-size: 13px; color: var(--warn); background: var(--warn-soft); padding: 1px 8px; border-radius: 4px; }
+.tag { font-size: 12px; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 0 6px; margin-left: 6px; white-space: nowrap; font-weight: 400; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; background: var(--surface); }
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
+th, td { text-align: left; padding: 8px 12px; border-top: 1px solid var(--line); vertical-align: top; }
+thead th { border-top: 0; font-size: 12px; letter-spacing: 0.05em; color: var(--muted); font-weight: 500; }
+td.num { font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 500; }
+.hide dd:not(.shown), .hide td.ans:not(.shown) { cursor: pointer; background: var(--mask); color: transparent; border-radius: 4px; user-select: none; }
+.hide dd:not(.shown) *, .hide td.ans:not(.shown) * { color: transparent !important; background: transparent !important; }
+mark { background: #ffe58a; color: #17212b; border-radius: 2px; }
+.empty { color: var(--muted); padding: 24px 0; }
+@media (max-width: 640px) {
+  .row { grid-template-columns: 1fr; }
+  header.top h1 { font-size: 22px; }
+}
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <h1>AI EasyMaker 요점정리</h1>
+    <p>NHN Cloud CAA 시험의 AI EasyMaker 영역만 따로 모았습니다. 작업 흐름 순서로 묶고 중복은 합쳤습니다. 「가리기」를 켜면 답이 가려지고, 누르면 하나씩 보입니다.</p>
+  </div>
+</header>
+
+<div class="bar">
+  <div class="wrap">
+    <div class="controls">
+      <input id="q" type="search" placeholder="검색 (예: EM_MODEL_DIR, 스테이지, 120일, OIP)" aria-label="항목 검색">
+      <button id="hideBtn" type="button" aria-pressed="false">가리기</button>
+      <button id="revealBtn" type="button">모두 보기</button>
+      <span id="count"></span>
+    </div>
+    <nav class="chips" id="chips" aria-label="영역 바로가기"></nav>
+  </div>
+</div>
+
+<main class="wrap" id="main"></main>
+
+<script>
+const S = [
+{ id: "numbers", title: "EasyMaker 숫자 한눈에", lead: "시험에 자주 나오는 EasyMaker 한도·기본값만 모았습니다. 자세한 설명은 아래 각 묶음에 있습니다.", table: [
+  ["출시일 (릴리스 노트)", "2022년 12월 27일"],
+  ["실험 이름 (SDK)", "최대 50자"],
+  ["data_storage_size", "Object Storage 사용 시 필수, 300~10,000GB"],
+  ["SDK 파이프라인 부트 스토리지", "필수, 50GB 이상"],
+  ["데이터 세트 / SDK dataset_list", "최대 10개 / 10개"],
+  ["하이퍼파라미터 개수", "최대 100개"],
+  ["학습 timeout_hours", "기본 720, 1~720시간"],
+  ["분산 학습 노드", "최대 10개"],
+  ["튜닝 노드 제약", "분산 노드 수 × 병렬 학습 수 ≤ 10"],
+  ["조기 종료 (MEDIAN)", "min_trial_count 3 · start_step 4"],
+  ["IC 기본값", "learning_rate 0.1 · batch 16 · epochs 3 · input_size 28"],
+  ["SS·OD 기본값", "learning_rate 2e-4 · batch 4 · epochs 3.0"],
+  ["logging_steps", "기본 500, 범위 [500~∞)"],
+  ["모델 평가 데이터", "20GB 이하, 분류 클래스 50개 이하"],
+  ["엔드포인트 인스턴스 수", "기본 1, 1~10"],
+  ["endpoint_model_resource_list", "필수, 최대 10개"],
+  ["SS 엔드포인트 이미지 조정", "512×512"],
+  ["API Gateway 한도 (엔드포인트)", "요청·응답 10MB · 타임아웃 60초"],
+  ["배치 추론 SDK", "instance 1~10 · pod 1~100 · batch 1~1000 · timeout 1~1200초"],
+  ["파이프라인 max_concurrency_count", "기본 1, 1~10"],
+  ["파이프라인 Cron", "6필드 (Auto Scale 예약은 5필드)"],
+  ["텐서보드 지표·파이프라인 아티팩트", "120일 후 자동 삭제"],
+  ["RAG 문서 수집", "총 100GB · 1,000,000개 · txt류 3MB · pdf류 50MB"]
+]},
+{ id: "em", title: "AI EasyMaker", lead: "출제 비중이 가장 큰 영역입니다. 작업 흐름(개요 → 노트북 → 스토리지 → 데이터 세트 → 기본 알고리즘 → 학습 → 튜닝 → 모델 → 평가 → 엔드포인트 → 추론 → 배치 추론 → 파이프라인 → 로그·RAG) 순서로 묶었습니다.", groups: [
+ { name: "개요", items: [
+  ["정의", "AI 학습·고도화를 위해 <b>개발 환경, 알고리즘 학습, 모델·엔드포인트 관리</b>를 한 플랫폼에서 제공"],
+  ["주요 기능", "Development Environment(노트북), Training, Hyperparameter Tuning, Model Management, Endpoint(Serving), Pipeline, RAG. <b>라벨링은 없음</b>"],
+  ["학습 vs 엔드포인트", "학습(Training): 알고리즘을 학습하고 결과를 통계로 확인 / 엔드포인트(Serving): 모델을 서빙하는 엔드포인트 생성·관리"],
+  ["실험", "연관된 학습을 <b>그룹화</b>해 관리. SDK로 만들 때 이름 <b>최대 50자</b>"],
+  ["'학습 템플릿' 메뉴 영역", "학습 템플릿, 파이프라인 실행, 개인 이미지"],
+  ["출시일 (릴리스 노트)", "<b>2022년 12월 27일</b>"],
+  ["SDK 설치·초기화", "<code>python -m pip install easymaker</code>. 초기화 값: <b>앱키·인증 토큰·리전</b>. 앱키는 콘솔 오른쪽 위 <b>URL & Appkey</b> 메뉴"],
+  ["SDK 생성 함수의 wait", "기본 <code>True</code>(완료 후 반환), <code>False</code>면 요청 후 <b>즉시 반환</b>"]
+ ]},
+ { name: "리소스 의존 관계 · 삭제 순서", items: [
+  ["삭제를 막는 의존 관계", "학습이 있으면 <b>실험</b> 삭제 불가 · 엔드포인트가 있으면 <b>모델</b> 삭제 불가 · 기본 외 스테이지가 있으면 <b>엔드포인트</b> 삭제 불가 · <b>기본 스테이지</b>는 삭제 불가"],
+  ["올바른 삭제 순서", "<b>엔드포인트 → 모델</b>, <b>학습 → 실험</b>"],
+  ["엔드포인트·스테이지 삭제 시 API Gateway", "스테이지 삭제 → API Gateway <b>스테이지</b>도 삭제 / 엔드포인트 삭제 → 배포된 API Gateway <b>서비스</b>도 삭제"]
+ ]},
+ { name: "노트북 · 이미지", items: [
+  ["노트북", "ML 필수 패키지가 설치된 <b>주피터 노트북</b> 생성·관리. 프레임워크는 <b>TensorFlow 또는 PyTorch</b>"],
+  ["제공 이미지 버전", "TensorFlow <b>2.12.0</b>, Python <b>3.10.12</b>, PyTorch 2.4<br><span class=\"note\">PyTorch가 2.4와 2.0.1 두 가지로 적혀 있음. 가이드 버전 확인</span>"],
+  ["인스턴스 타입 변경", "<b>같은 코어 타입</b>으로만 가능 (CPU→GPU 변경 불가), GPU 인스턴스는 사양 변경 불가"],
+  ["스토리지", "<code>/root/easymaker</code>에 마운트되는 블록 스토리지, <b>재시작해도 유지</b>. 생성 후 크기 <b>변경 불가</b>"],
+  ["노트북 삭제 시", "부트·데이터 스토리지는 삭제, <b>연결한 NAS는 남음</b> (NAS에서 따로 삭제)"],
+  ["개인 이미지", "EasyMaker 제공 노트북/딥러닝 이미지에서 <b>파생된 이미지만</b> 사용 가능, 레지스트리는 <b>NCR만</b> 연동 (2023년 12월 기준)"]
+ ]},
+ { name: "스토리지 · 권한", items: [
+  ["사용 가능한 저장소", "<b>NHN Cloud NAS</b>(EasyMaker와 <b>같은 프로젝트</b>만) / <b>NHN Cloud Object Storage</b>"],
+  ["Object Storage 권한", "사용자 컨테이너에 <b>EasyMaker 시스템 계정의 읽기/쓰기 권한</b>을 허용해야 함. 시스템 계정이 입력을 읽고 결과·모델을 저장하기 때문"],
+  ["경로 형식", "NAS <code>nas://{NAS ID}:/{path}</code> / OBS <code>obs://{Object Storage API 엔드포인트}/{containerName}/{path}</code>"],
+  ["Object Storage 접근 표", "학습 읽기: <b>알고리즘 경로, 학습 입력 데이터 경로</b> / 학습 쓰기: <b>학습 출력 데이터, 체크포인트 경로</b> / 모델·엔드포인트 읽기: <b>모델 아티팩트 경로</b>"],
+  ["data_storage_size", "<b>Object Storage 사용 시에만 필수</b>, <b>300~10,000GB</b>. NAS 사용 시 불필요"],
+  ["학습 중 입력 데이터 삭제", "학습 완료 전에 지우면 학습이 <b>실패</b>할 수 있음"],
+  ["모델 아티팩트를 지운 경우", "해당 모델의 엔드포인트 생성 <b>실패(CREATE FAILED)</b>"]
+ ]},
+ { name: "데이터 세트", items: [
+  ["지정 방식", "학습 생성 시 데이터 세트 <b>최대 10개</b>(SDK <code>dataset_list</code>도 10개), 각 경로에 Object Storage 또는 NAS 경로 입력"],
+  ["데이터 세트 이름이 중요한 이유", "학습 코드가 <code>EM_DATASET_${이름}</code> 환경 변수로 경로를 받음 (다운로드된 폴더의 <b>절대 경로</b>). 예: <code>EM_DATASET_train</code>"],
+  ["전체 목록 환경 변수", "<code>EM_DATASETS</code> (JSON 형식)"],
+  ["Image Classification 구조", "레이블 이름 폴더 아래 이미지 (<code>folder/train/{label}/image_file.png</code>). <b>train·validation 필수, test 선택</b> (test 생략해도 학습 진행)"],
+  ["Semantic Segmentation 구조", "train, validation, resources, test. <code>train.json</code>: 이미지와 마스크(seg_map) 경로 매핑 / resources: 레이블 클래스↔ID 매핑 <code>id2label.json</code>"],
+  ["Object Detection 구조", "<b>train, validation, test 모두 필수</b>. 주석 파일은 COCO 형식 <code>_annotations.coco.json</code>"]
+ ]},
+ { name: "기본 알고리즘", items: [
+  ["종류", "<b>3가지뿐</b>: Image Classification(ResNet-50, 이미지 종류 분류), Semantic Segmentation(SegFormer-B3, 모든 픽셀의 레이블 예측), Object Detection(detr-resnet-50, 모든 객체의 bbox와 class 예측)"],
+  ["OCR·Deep Tagging", "기본 알고리즘에 <b>없음</b>. 별도 AI Service 상품이거나 자체 알고리즘으로 구현"],
+  ["기본 알고리즘을 쓰는 이유", "데이터 세트만 준비하면 <b>학습 코드 없이</b> 모델 생성"],
+  ["학습 생성 시 알고리즘 유형", "NHN Cloud 제공 알고리즘 / 자체 알고리즘"],
+  ["Image Classification 기본값", "<code>learning_rate</code> 0.1, <code>per_device_train_batch_size</code> 16 [2~∞), <code>num_train_epochs</code> int 3, <code>input_size</code> 28 (출력 이미지 해상도)"],
+  ["Semantic Segmentation · Object Detection 기본값", "<code>learning_rate</code> 2e-4, <code>per_device_train_batch_size</code> 4 (SS [0~∞), OD [1~∞)), <code>num_train_epochs</code> float 3.0"],
+  ["learning_rate의 옵티마이저", "<b>AdamW</b> 초기값"],
+  ["logging_steps", "기본 <b>500</b>, 범위 [500~∞)"]
+ ]},
+ { name: "학습 (자체 알고리즘 · SDK)", items: [
+  ["알고리즘 경로와 엔트리 포인트", "<code>source_dir_uri</code>에 코드를 두고, 최초 실행 파이썬 파일 <code>entry_point</code>가 <b>그 안에</b> 있어야 함"],
+  ["학습 환경 변수", "<code>EM_MODEL_DIR</code>, <code>EM_CHECKPOINT_DIR</code>, <code>EM_TENSORBOARD_LOG_DIR</code>, <code>EM_REGION</code>, <code>EM_APPKEY</code>, <code>EM_DATASET_{이름}</code>, <code>EM_DATASETS</code>"],
+  ["모델 저장 위치", "반드시 <code>EM_MODEL_DIR</code>. 다른 경로에 저장하면 모델 생성 시 아티팩트를 <b>찾지 못함</b>"],
+  ["하이퍼파라미터를 환경 변수로 읽기", "<code>EM_HP_</code> + 키 대문자 (예: <code>EM_HP_LEARNING_RATE</code>)"],
+  ["입력 개수 한도", "하이퍼파라미터 <b>최대 100개</b>, 데이터 세트 <b>최대 10개</b><br><span class=\"note\">하이퍼파라미터 10개라는 문항도 있음. 대부분 100개로 적혀 있어 100개 기준</span>"],
+  ["experiment_id", "<code>easymaker.init</code>에서 입력하지 않았으면 <b>필수</b> (입력했으면 생략 가능)"],
+  ["대기·실행 시간", "최대 대기 시간을 넘기면 종료. 실행 시간 <code>timeout_hours</code> <b>기본 720, 범위 1~720시간</b>"],
+  ["분산 학습", "최대 <b>10개</b> 노드. PyTorch 백엔드: CPU <code>gloo</code>, GPU <code>nccl</code><br><span class=\"note\">이전 정리본의 100개는 10개로 정정 (튜닝 노드 제약 ≤10과 일치)</span>"],
+  ["use_torchrun", "기본 <code>False</code>, <b>PyTorch 이미지에서만</b>. True면 <code>nproc_per_node</code> 필수 (1~CPU 또는 GPU 개수)"],
+  ["GPU 할당 주의", "파드 수와 GPU 수가 나누어떨어지지 않으면 <b>할당되지 않는 GPU</b>가 생길 수 있음"],
+  ["중단 지점부터 이어서 학습", "저장된 <b>체크포인트 경로</b>를 입력해 체크포인트에서 시작"],
+  ["학습 중 지표 확인", "<b>학습 → 텐서보드 바로가기</b>. 지표는 <b>120일</b> 후 자동 삭제"],
+  ["학습 상태 값", "CREATE REQUESTED, CREATE IN PROGRESS, RUNNING, STOPPED, COMPLETE, STOP IN PROGRESS, FAIL TRAIN, CREATE FAILED, FAIL TRAIN IN PROGRESS, COMPLETE IN PROGRESS"]
+ ]},
+ { name: "하이퍼파라미터 튜닝", items: [
+  ["정의", "모델 예측 정확도를 최대화하도록 하이퍼파라미터 값을 최적화하는 과정"],
+  ["타입별 필수 입력", "<b>INT·DOUBLE</b>: min/max (GRID 전략이면 step도) / <b>DISCRETE·CATEGORICAL</b>: <code>specified_values</code>"],
+  ["자체 알고리즘 필수 설정", "<code>metric_list</code>, <code>objective_metric_name</code>, <code>objective_type_code</code>(MINIMIZE/MAXIMIZE)"],
+  ["목표 지표 도달 시 자동 종료", "<code>objective_goal</code> (예: 0.95)"],
+  ["성과 나쁜 학습 조기 종료", "<code>early_stopping_algorithm=MEDIAN</code>, <code>min_trial_count</code> 기본 3, <code>start_step</code> 기본 4"],
+  ["노드 수 제약", "<code>distributed_node_count × parallel_trial_count ≤ 10</code> (예: 2노드 × 병렬 5 = 10 → 가능)"],
+  ["완료 상세", "GoalReached(목표 도달), MaxTrialsReached(최대 학습 수 도달), SuggestionEndReached(탐색 종료)"],
+  ["hyperparameter_tuning_id로 모델 생성", "<b>최고 학습</b>으로 생성됨"]
+ ]},
+ { name: "모델", items: [
+  ["모델 관리", "학습 결과 모델 또는 <b>외부 모델</b>을 아티팩트로 관리"],
+  ["생성 조건", "<b>COMPLETE</b> 학습만 모델로 생성. 학습 ID 없이 <b>모델 경로 + 프레임워크</b>만으로도 생성 가능"],
+  ["model_format_code", "TENSORFLOW, PYTORCH, SCIKIT_LEARN, HUGGING_FACE, TENSORFLOW_TRITON, PYTORCH_TRITON, ONNX_TRITON"],
+  ["프레임워크별 형식", "TensorFlow: <b>SavedModel(.pb)</b> / PyTorch: <b>TorchServe .mar</b>, 모델 이름 = PyTorch 모델 이름 / HuggingFace: <b>safetensors</b> / Triton(예: ONNX_TRITON): 모델 파일 + <code>config.pbtxt</code>가 Triton 실행 구조로"],
+  ["외부 HuggingFace 모델 서빙 준비", "safetensors 파일을 저장소에 두고, 학습 ID 없이 모델 경로와 <code>HUGGING_FACE</code>로 모델 생성"],
+  ["모델 상태 값", "CREATE REQUESTED, CREATE IN PROGRESS, ACTIVE, DELETE IN PROGRESS, CREATE FAILED, DELETE FAILED"]
+ ]},
+ { name: "모델 평가", items: [
+  ["지원 모델", "<b>분류·회귀만</b>. SDK <code>objective_code</code> CLASSIFICATION / REGRESSION, <code>target_field_name</code> = 정답 레이블 필드 이름"],
+  ["입력 조건", "<b>20GB 이하</b>, 분류는 클래스 <b>50개 이하</b>. 형식 CSV, JSONL<br><span class=\"note\">JSON과 JSONL 두 가지로 적혀 있음</span>"],
+  ["동작", "선택한 모델로 <b>배치 추론이 자동 실행</b>되고 평가 지표 저장"],
+  ["분류 지표", "PR AUC, ROC AUC, Log Loss, F1 Score, Precision, Recall, 곡선, Confusion Matrix"],
+  ["회귀 지표", "MAE, MAPE, R-squared, RMSE, RMSLE"],
+  ["Image Classification 지표", "Accuracy(올바른 예측 수 ÷ 실제 데이터 수), Precision, Recall, F1-Score(Precision과 Recall의 <b>조화 평균</b>)"],
+  ["Semantic Segmentation 지표", "<code>mean_iou</code>(예측·정답 영역 겹침 비율의 클래스 평균), <code>mean_accuracy</code>, <code>overall_accuracy</code>(예측과 정답이 같은 비율의 모든 이미지 평균), <code>per_category_accuracy</code>, <code>per_category_iou</code>"]
+ ]},
+ { name: "엔드포인트 생성", items: [
+  ["사전 체크리스트", "<b>API Gateway 서비스 활성화</b>, API Gateway 리소스 쿼터 여유, 모델 아티팩트 보존, 엔드포인트·스테이지 <b>이름 중복 없음</b>"],
+  ["쿼터 초과 시 메시지", "'API Gateway 서비스 리소스 쿼터를 조정하시기 바랍니다.'"],
+  ["생성 시 만들어지는 것", "새 <b>API Gateway 서비스</b>와 <b>기본 스테이지</b>. 엔드포인트는 <b>이중화</b> 구성 제공"],
+  ["SDK 파라미터", "인스턴스 수 기본 1, <b>1~10</b> / <code>endpoint_model_resource_list</code> 필수, 최대 10개"],
+  ["리소스 할당 방식", "인스턴스 실사용 리소스의 <b>고정 비율</b> 할당 또는 <b>cpu·memory·gpu 직접 입력</b>. 입력한 할당량은 실사용량을 넘을 수 없음"],
+  ["같은 모델을 한 스테이지의 여러 리소스에 배포", "요청이 <b>분산 처리</b>됨"],
+  ["오토스케일", "<b>노드 오토스케일러: 스테이지 단위</b>(최소/최대 노드, scale-down, 임계값, 지속 시간) / <b>파드 오토스케일러: 모델 단위</b>, CPU 또는 Memory 임계값(%). <code>pod_auto_scale_enable</code> 기본 False, <code>scale_metric_code</code> CPU_UTILIZATION·MEMORY_UTILIZATION"],
+  ["엔드포인트 상태", "<b>ACTIVE</b> = 정상 구동"],
+  ["스테이지 상태", "DEPLOY IN PROGRESS, DEPLOY FAILED"],
+  ["엔드포인트의 API Gateway 상태", "CREATE IN PROGRESS, STAGE DEPLOYING, ACTIVE, NOT FOUND: STAGE, NOT FOUND: STAGE DEPLOY RESULT, STAGE DEPLOY FAIL"]
+ ]},
+ { name: "스테이지 운영", items: [
+  ["기본 스테이지", "실제 서비스가 운영되는 스테이지, <b>삭제 불가</b>"],
+  ["신규 스테이지 추가", "API Gateway 서비스에 신규 스테이지 생성. 기본 스테이지 <b>영향 없이 테스트</b> 가능"],
+  ["순단 없는 모델 교체 (권장)", "신규 스테이지에 v2 배포·검증 → 신규 스테이지를 <b>기본 스테이지로 변경</b> → 기존 기본 스테이지 리소스 <b>자동 삭제</b> (중복 자원 정리로 비용 절감)"]
+ ]},
+ { name: "추론 호출", items: [
+  ["학습부터 배포까지 흐름", "학습(COMPLETE) → <b>모델 생성</b> → <b>엔드포인트 생성</b>(API Gateway 서비스·기본 스테이지) → 스테이지 엔드포인트 URL로 추론 호출"],
+  ["시나리오 예: OD 실시간 호출", "컨테이너에 시스템 계정 권한 부여 → OD 기본 알고리즘(train/validation/test, <code>_annotations.coco.json</code>)으로 학습 → COMPLETE 학습으로 모델 → 엔드포인트 → POST 호출"],
+  ["OIP (Open Inference Protocol)", "EasyMaker가 지원하는 추론 API 규격. <code>POST /{model_name}/v2/models/{model_name}[/versions/{model_version}]/infer</code>, LLM(OpenAI 호환) <code>POST /{model_name}/openai/v1/chat/completions</code>"],
+  ["추론 경로를 /inference로 설정", "<code>POST https://{endpoint-domain}/inference</code>"],
+  ["curl 예시", "<code>curl --location --request POST '{API Gateway 리소스 경로}'</code> + instances 본문"],
+  ["요청·응답 JSON 키", "요청 <code>instances</code>, 응답 <code>predictions</code>. 이미지 요청은 <code>{\"instances\": [{\"data\": \"image_to_bytes_array\"}]}</code> (Base64 Byte Array)"],
+  ["기본 알고리즘 응답", "IC: 레이블별 <b>score</b> / SS: <b>512×512</b>로 조정 후 픽셀별 label 배열 / OD: 객체 bbox(<code>xmin, ymin, xmax, ymax</code>) 목록"],
+  ["API Gateway 한도 고려", "요청·응답 <b>10MB</b>(조정 불가), 타임아웃 <b>60초</b>. 이미지는 Base64로 커지므로 대용량·장시간 추론 설계 시 주의"],
+  ["파트너별 호출량 관리", "연동된 API Gateway의 <b>API Key · 사용량 계획 · 요청 수 제한</b>"]
+ ]},
+ { name: "배치 추론", items: [
+  ["용도", "실시간 응답 없이 결과를 <b>파일로</b> 받고 통계로 확인. 모델 평가 때 <b>자동 생성</b>되기도 함"],
+  ["입력", "<b>JSON, JSONL</b> (Object Storage 또는 NAS). 포함·제외 Glob 패턴을 같이 쓰면 <b>제외가 우선</b>"],
+  ["옵션", "Batch Size, Inference Timeout(초), Maximum Batch Inference Time"],
+  ["SDK 범위", "<code>instance_count</code> 1~10, <code>pod_count</code> 1~100, <code>batch_size</code> 1~1000, <code>inference_timeout_seconds</code> 1~1200, <code>timeout_hours</code> 기본 720·1~720"],
+  ["파드를 늘렸더니 파드당 메모리 감소", "인스턴스 실사용 리소스를 <b>파드 수로 나누어</b> 할당하기 때문"],
+  ["늦게 끝나거나 일부 시간 초과", "<b>배치 크기</b>와 <b>추론 제한 시간</b>을 조정"],
+  ["상태 값", "COMPLETE, STOP IN PROGRESS, FAIL BATCH INFERENCE, CREATE FAILED, FAIL BATCH INFERENCE IN PROGRESS, COMPLETE IN PROGRESS"]
+ ]},
+ { name: "파이프라인", items: [
+  ["작성·업로드", "<b>Kubeflow Pipelines(KFP) Python SDK</b>로 작성 → <b>YAML</b>로 업로드"],
+  ["매일 자동 실행 (전처리→학습→평가)", "반복 실행 일정을 <b>6필드 Cron</b>으로 생성 <span class=\"tag\">Auto Scale 예약은 5필드</span>"],
+  ["SDK 일정 주기", "<code>schedule_periodic_minutes</code>와 <code>schedule_cron_expression</code> 중 <b>하나는 필수</b>"],
+  ["동시 실행·종료", "<code>max_concurrency_count</code> 기본 1·범위 1~10. <code>schedule_end_datetime</code>을 비우면 중지할 때까지 계속 실행 생성"],
+  ["SDK 실행 부트 스토리지", "<b>필수, 50GB 이상</b>"],
+  ["아티팩트", "아티팩트 유형은 데이터셋·모델·메트릭 등 ML 출력용. <b>120일</b> 후 자동 삭제"],
+  ["제약", "진행 중인 실행은 <b>삭제 불가</b>, 실행 중 콘솔 출력 조회 기능 <b>미제공</b>"],
+  ["반복 실행(Recurring run) 상태 값", "CREATE REQUESTED, CREATE FAILED, ENABLED, ENABLED(EXPIRED), DISABLED"]
+ ]},
+ { name: "로그", items: [
+  ["로그 저장", "SDK <code>use_log=True</code>(기본 False). <b>Log & Crash Search</b>를 활성화해야 하며 <b>별도 요금</b>. LNC 알람 사용 가능"],
+  ["자세한 실패 정보", "로그 관리가 켜져 있으면 Log & Crash Search에서 확인"],
+  ["공통 로그 필드", "logType <code>NHNCloud-AIEasyMaker</code>, category <code>easymaker.training</code>·<code>easymaker.inference</code>, logLevel INFO·WARNING·ERROR"],
+  ["엔드포인트 로그 필드", "endpointId, endpointStageId, <b>inferenceId</b>(개별 추론 요청 식별), action(Endpoint.Model), modelName"]
+ ]},
+ { name: "RAG", items: [
+  ["용도", "LLM 기반 사내 문서 Q&A, <b>LLM 응답 정확도 향상</b>"],
+  ["문서 수집 한도", "총 <b>100GB</b>, 최대 <b>1,000,000개</b> 파일. txt·md·csv·xls(x) 개당 <b>3MB</b>, doc(x)·pdf·ppt(x) 개당 <b>50MB</b>"]
+ ]}
+]},
+];
+
+// 단일 서비스 파일: 묶음마다 별도 영역으로 펼쳐 바로가기 칩을 만든다
+const EM = S.pop();
+for (const g of EM.groups) S.push({ id: "g" + S.length, title: g.name, groups: [{ items: g.items }] });
+
+const main = document.getElementById("main");
+const chips = document.getElementById("chips");
+
+function rowHTML(it) {
+  return `<div class="row"><dt>${it[0]}</dt><dd>${it[1]}</dd></div>`;
+}
+function render() {
+  let html = "";
+  for (const s of S) {
+    const n = s.table ? s.table.length : s.groups.reduce((a, g) => a + g.items.length, 0);
+    html += `<section id="${s.id}" data-sec><h2>${s.title}<small>${n}개</small></h2>`;
+    if (s.lead) html += `<p class="lead">${s.lead}</p>`;
+    if (s.table) {
+      html += `<div class="tbl"><table><thead><tr><th>항목</th><th>값</th></tr></thead><tbody>` +
+        s.table.map(r => `<tr class="row-t"><td>${r[0]}</td><td class="num ans">${r[1]}</td></tr>`).join("") +
+        `</tbody></table></div>`;
+    } else {
+      for (const g of s.groups) {
+        html += `<div data-grp>${g.name ? `<h3>${g.name}</h3>` : ""}<dl>${g.items.map(rowHTML).join("")}</dl></div>`;
+      }
+    }
+    html += `</section>`;
+    chips.insertAdjacentHTML("beforeend", `<a href="#${s.id}">${s.title}</a>`);
+  }
+  main.innerHTML = html + `<p class="empty" id="empty" hidden>검색 결과가 없습니다. 다른 단어로 찾아보세요.</p>`;
+  for (const el of main.querySelectorAll(".row, .row-t")) el.dataset.text = el.textContent.toLowerCase();
+}
+render();
+
+const q = document.getElementById("q");
+const count = document.getElementById("count");
+const total = main.querySelectorAll(".row, .row-t").length;
+function filter() {
+  const t = q.value.trim().toLowerCase();
+  let shown = 0;
+  for (const r of main.querySelectorAll(".row, .row-t")) {
+    const ok = !t || r.dataset.text.includes(t);
+    r.hidden = !ok; if (ok) shown++;
+  }
+  for (const g of main.querySelectorAll("[data-grp]")) g.hidden = !g.querySelector(".row:not([hidden])");
+  for (const s of main.querySelectorAll("[data-sec]")) s.hidden = !s.querySelector(".row:not([hidden]), .row-t:not([hidden])");
+  document.getElementById("empty").hidden = shown > 0;
+  count.textContent = t ? `${shown} / ${total}개` : `전체 ${total}개`;
+}
+q.addEventListener("input", filter);
+filter();
+
+const hideBtn = document.getElementById("hideBtn");
+function setHide(on) {
+  document.body.classList.toggle("hide", on);
+  hideBtn.setAttribute("aria-pressed", String(on));
+  for (const d of main.querySelectorAll(".shown")) d.classList.remove("shown");
+  try { localStorage.setItem("em-hide", on ? "1" : "0"); } catch (e) {}
+}
+hideBtn.addEventListener("click", () => setHide(!document.body.classList.contains("hide")));
+document.getElementById("revealBtn").addEventListener("click", () => {
+  for (const d of main.querySelectorAll("dd, td.ans")) d.classList.add("shown");
+});
+main.addEventListener("click", e => {
+  const d = e.target.closest("dd, td.ans");
+  if (d && document.body.classList.contains("hide")) d.classList.toggle("shown");
+});
+try { if (localStorage.getItem("em-hide") === "1") setHide(true); } catch (e) {}
+</script>
