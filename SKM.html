@@ -1,0 +1,239 @@
+<title>Secure Key Manager 요점정리</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: sticky toolbar (search, hide-answers, section chips) over one reading column of term→answer rows, grouped by exam domain */
+:root {
+  --bg: #f6f8fa;
+  --surface: #ffffff;
+  --fg: #17212b;
+  --muted: #5b6875;
+  --line: #dde3e9;
+  --accent: #1d5f8a;
+  --accent-soft: #e3eef6;
+  --warn: #9a5b00;
+  --warn-soft: #fdf1dc;
+  --mask: #d5dde4;
+  --font-body: "IBM Plex Sans KR", "Malgun Gothic", "Apple SD Gothic Neo", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", Consolas, "D2Coding", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #11171d; --surface: #182129; --fg: #e3e9ef; --muted: #98a6b3; --line: #2a3640;
+    --accent: #7db8e0; --accent-soft: #1d3446; --warn: #f0b860; --warn-soft: #3a2c14; --mask: #2c3943;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #11171d; --surface: #182129; --fg: #e3e9ef; --muted: #98a6b3; --line: #2a3640;
+  --accent: #7db8e0; --accent-soft: #1d3446; --warn: #f0b860; --warn-soft: #3a2c14; --mask: #2c3943;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 15px; line-height: 1.6; }
+.wrap { max-width: 980px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header.top { padding-block: 28px 8px; }
+header.top h1 { font-size: 26px; margin: 0 0 4px; text-wrap: balance; letter-spacing: -0.01em; }
+header.top p { margin: 0; color: var(--muted); }
+.bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--line); }
+.bar .wrap { padding-block: 10px; display: flex; flex-direction: column; gap: 8px; }
+.controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+#q { flex: 1 1 220px; min-width: 0; font: inherit; padding: 8px 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--surface); color: var(--fg); }
+#q:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button { font: inherit; font-size: 14px; padding: 7px 12px; border-radius: 6px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); cursor: pointer; }
+button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--surface); }
+#count { color: var(--muted); font-size: 13px; font-variant-numeric: tabular-nums; }
+.chips { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 2px; scrollbar-width: thin; }
+.chips a { flex: none; font-size: 13px; text-decoration: none; color: var(--accent); background: var(--accent-soft); padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+main { padding-block: 16px 64px; display: flex; flex-direction: column; gap: 36px; }
+section h2 { font-size: 20px; margin: 0 0 4px; display: flex; align-items: baseline; gap: 10px; scroll-margin-top: 120px; }
+section h2 small { font-size: 13px; font-weight: 400; color: var(--muted); font-variant-numeric: tabular-nums; }
+section > .lead { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+h3 { font-size: 13px; letter-spacing: 0.06em; color: var(--accent); margin: 18px 0 6px; font-weight: 700; }
+dl { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; }
+.row { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 3fr); gap: 4px 20px; padding: 10px 14px; border-top: 1px solid var(--line); }
+.row:first-child { border-top: 0; }
+dt { font-weight: 500; min-width: 0; }
+dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+dd b { color: var(--accent); }
+code { font-family: var(--font-mono); font-size: 13px; background: var(--accent-soft); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+.note { display: inline-block; margin-top: 4px; font-size: 13px; color: var(--warn); background: var(--warn-soft); padding: 1px 8px; border-radius: 4px; }
+.tag { font-size: 12px; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; padding: 0 6px; margin-left: 6px; white-space: nowrap; font-weight: 400; }
+table { border-collapse: collapse; width: 100%; font-size: 14px; background: var(--surface); }
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; }
+th, td { text-align: left; padding: 8px 12px; border-top: 1px solid var(--line); vertical-align: top; }
+thead th { border-top: 0; font-size: 12px; letter-spacing: 0.05em; color: var(--muted); font-weight: 500; }
+td.num { font-variant-numeric: tabular-nums; white-space: nowrap; font-weight: 500; }
+.hide dd:not(.shown), .hide td.ans:not(.shown) { cursor: pointer; background: var(--mask); color: transparent; border-radius: 4px; user-select: none; }
+.hide dd:not(.shown) *, .hide td.ans:not(.shown) * { color: transparent !important; background: transparent !important; }
+mark { background: #ffe58a; color: #17212b; border-radius: 2px; }
+.empty { color: var(--muted); padding: 24px 0; }
+@media (max-width: 640px) {
+  .row { grid-template-columns: 1fr; }
+  header.top h1 { font-size: 22px; }
+}
+@media (prefers-reduced-motion: no-preference) { html { scroll-behavior: smooth; } }
+</style>
+
+<header class="top">
+  <div class="wrap">
+    <h1>Secure Key Manager 요점정리</h1>
+    <p>NHN Cloud CAA 시험의 Secure Key Manager(SKM) 영역만 따로 모았습니다. 기능별로 묶고 중복은 합쳤습니다. 「가리기」를 켜면 답이 가려지고, 누르면 하나씩 보입니다.</p>
+  </div>
+</header>
+
+<div class="bar">
+  <div class="wrap">
+    <div class="controls">
+      <input id="q" type="search" placeholder="검색 (예: 회전, 승인, 32KB, 인증서)" aria-label="항목 검색">
+      <button id="hideBtn" type="button" aria-pressed="false">가리기</button>
+      <button id="revealBtn" type="button">모두 보기</button>
+      <span id="count"></span>
+    </div>
+    <nav class="chips" id="chips" aria-label="영역 바로가기"></nav>
+  </div>
+</div>
+
+<main class="wrap" id="main"></main>
+
+<script>
+const S = [
+{ id: "numbers", title: "SKM 숫자·항목 한눈에", lead: "시험에 자주 나오는 값과 항목 목록만 모았습니다. 자세한 설명은 아래 각 묶음에 있습니다.", table: [
+  ["암호화 키 구조", "루트 키 + 시스템 키, 물리적으로 분리된 3개 시스템"],
+  ["데이터 유형", "기밀 데이터(문자열) · 대칭 키(암·복호화) · 비대칭 키(서명·검증)"],
+  ["데이터 초기 상태", "사용 중"],
+  ["클라이언트 인증 방식", "IPv4 주소 · MAC 주소 · 클라이언트 인증서"],
+  ["인증서 생성 항목", "이름 · 비밀번호 · 설명 · 사용 기간"],
+  ["여러 인증 선택 시", "모두 통과해야 사용 가능"],
+  ["키 생성 항목", "이름 · 설명 · 회전 주기"],
+  ["기밀 데이터 생성 항목 / 크기", "이름 · 설명 · 데이터 / 32KB 이하"],
+  ["비대칭 키 서명·검증 데이터", "245Byte 이하"],
+  ["대칭 키 가져오기", "AES-256, 32개 Hex String (쉼표·공백 구분)"],
+  ["자동 회전 주기", "30일 이상 (가져온 키는 회전 불가)"],
+  ["삭제 예정 대기", "7일 (즉시 삭제·삭제 취소 가능)"],
+  ["승인 기능 위치", "조직 관리 → 거버넌스 설정 → 승인 프로세스 관리"],
+  ["승인 역할", "APPROVAL ADMIN(승인자) · APPROVAL MEMBER(요청자)"],
+  ["승인 후 반영", "즉시"]
+]},
+{ id: "skm", title: "Secure Key Manager (SKM)", lead: "구조 → 키 저장소·인증 → 데이터 생성 → 회전·삭제 → 블록 스토리지 연동 → 승인 프로세스 순서로 묶었습니다.", groups: [
+ { name: "구조 · 기본 개념", items: [
+  ["비정상 접근을 어렵게 만드는 구조", "<b>루트 키·시스템 키</b> 두 암호화 키 사용. 루트 키·시스템 키·사용자 데이터를 <b>물리적으로 분리된 세 시스템</b>에서 모두 얻어야 함"],
+  ["데이터 유형과 용도", "<b>기밀 데이터</b>: 문자열 저장·조회 / <b>대칭 키</b>: 암·복호화 / <b>비대칭 키</b>: 서명·검증"],
+  ["키를 사용할 수 있는 주체", "<b>인증에 성공한 클라이언트만</b>"],
+  ["'대칭 키 원문을 받아 앱에서 직접 쓰고 싶다'", "불가. 사용자 대칭 키는 클라이언트에 <b>직접 노출되지 않고 API로만</b> 사용"],
+  ["대용량 파일 암호화 (크기 제한)", "<b>봉투 암호화</b>: 로컬 키로 데이터를 암호화하고, 그 로컬 키를 SKM API로 암호화"],
+  ["사용자가 만든 데이터의 초기 상태", "<b>사용 중</b>"]
+ ]},
+ { name: "키 저장소 · 클라이언트 인증", items: [
+  ["키 저장소", "사용자 데이터 저장과 <b>인증 방식 설정의 단위</b>. 이름·설명 입력 후 <b>인증 방법 1개 이상</b> 선택 → 추가"],
+  ["클라이언트 인증 방식", "<b>IPv4 주소, MAC 주소, 클라이언트 인증서</b>"],
+  ["인증 정보 등록 메뉴", "<b>IPv4 주소 관리</b>, <b>MAC 주소 관리</b>, <b>인증서 관리</b>"],
+  ["IPv4 주소 입력값", "클라이언트가 SKM에 <b>접속할 때 사용하는 IPv4 주소</b>"],
+  ["인증서 생성 입력 항목", "<b>인증서 이름, 비밀번호, 설명, 사용 기간</b>"],
+  ["인증 방법을 여러 개 선택한 경우", "<b>모두 통과</b>해야 함. 예: IPv4 + 인증서 선택 시 IPv4만 통과하면 <b>사용 불가</b>"]
+ ]},
+ { name: "데이터 생성", items: [
+  ["대칭 키 · 비대칭 키 입력 항목", "이름, 설명, <b>회전 주기</b>"],
+  ["기밀 데이터 입력 항목", "이름, 설명, <b>데이터</b> (텍스트 <b>32KB 이하</b>)"],
+  ["비대칭 키", "<b>245Byte 이하</b> 데이터의 서명·검증"],
+  ["대칭 키 가져오기", "<b>AES-256</b> 지원. 입력 형식은 <b>32개의 Hex String</b>을 쉼표나 공백으로 구분"],
+  ["가져온 키의 회전", "<b>회전 기능 없음</b>"]
+ ]},
+ { name: "회전 · 삭제", items: [
+  ["회전이란", "<b>키 ID는 유지</b>하고 키 값만 갱신"],
+  ["회전 후 확인", "키 정보의 <b>키 버전 목록</b>에 새 버전 추가"],
+  ["회전 방식", "회전 주기 <b>30일 이상</b> 자동 회전 + <b>즉시 회전</b>"],
+  ["유출 의심으로 지금 바로 교체", "<b>즉시 회전</b>"],
+  ["삭제 예정 상태", "<b>사용 불가</b>, <b>7일 후</b> 완전 삭제. <b>즉시 삭제</b>·<b>삭제 취소</b> 가능"]
+ ]},
+ { name: "블록 스토리지 연동", items: [
+  ["관계", "암호화 블록 스토리지는 <b>SKM이 관리하는 대칭 키</b>로 암호화, 키 교체는 <b>SKM 키 회전</b>으로"],
+  ["생성 시 등록한 대칭 키 ID", "<b>변경 불가</b>. 키를 바꾸려면 SKM에서 <b>키 회전</b>"],
+  ["사용 중인 대칭 키를 삭제하면", "그 디스크를 <b>연결 해제한 뒤에는 다시 복호화할 수 없음</b>"]
+ ]},
+ { name: "승인 프로세스", items: [
+  ["켜는 곳", "<b>조직 관리 → 거버넌스 설정 → 승인 프로세스 관리</b> (예: ISMS-P 대응으로 키 변경 시 관리자 승인)"],
+  ["승인 프로세스 제공 서비스", "<b>Secure Key Manager</b>로 명시"],
+  ["역할", "승인자 <b>APPROVAL ADMIN</b>, 요청자 <b>APPROVAL MEMBER</b>(승인 요청 생성·조회)"],
+  ["추가되는 탭과 접근 권한", "'승인 리스트'·'키 저장소 관리' 탭, <b>승인자와 요청자만</b> 접근"],
+  ["승인 기능을 켠 뒤 데이터 직접 수정", "키 저장소에서 직접 추가·수정·삭제 <b>불가</b>, <b>승인 요청</b>을 거쳐야 함"],
+  ["승인 후 반영 시점", "승인을 누르는 <b>즉시</b> 키 저장소에 반영"]
+ ]},
+ { name: "활용 설계", items: [
+  ["비밀번호를 코드에 넣지 않는 설계", "DB 비밀번호를 <b>기밀 데이터</b>로 저장 → 애플리케이션이 인증(IPv4·MAC·인증서)을 통과해 <b>API로 조회</b>"],
+  ["키 관리 요구 (정기 교체·승인 통제)", "<b>30일 이상 자동 회전</b> + <b>즉시 회전</b> + <b>거버넌스 승인 프로세스</b>"],
+  ["관련 CloudTrail 이벤트: API 비밀번호 변경", "<code>event_id.iaas.identity.password_change</code>"]
+ ]}
+]},
+];
+
+// 단일 서비스 파일: 묶음마다 별도 영역으로 펼쳐 바로가기 칩을 만든다
+const SEC = S.pop();
+for (const g of SEC.groups) S.push({ id: "g" + S.length, title: g.name, groups: [{ items: g.items }] });
+
+const main = document.getElementById("main");
+const chips = document.getElementById("chips");
+
+function rowHTML(it) {
+  return `<div class="row"><dt>${it[0]}</dt><dd>${it[1]}</dd></div>`;
+}
+function render() {
+  let html = "";
+  for (const s of S) {
+    const n = s.table ? s.table.length : s.groups.reduce((a, g) => a + g.items.length, 0);
+    html += `<section id="${s.id}" data-sec><h2>${s.title}<small>${n}개</small></h2>`;
+    if (s.lead) html += `<p class="lead">${s.lead}</p>`;
+    if (s.table) {
+      html += `<div class="tbl"><table><thead><tr><th>항목</th><th>값</th></tr></thead><tbody>` +
+        s.table.map(r => `<tr class="row-t"><td>${r[0]}</td><td class="num ans">${r[1]}</td></tr>`).join("") +
+        `</tbody></table></div>`;
+    } else {
+      for (const g of s.groups) {
+        html += `<div data-grp>${g.name ? `<h3>${g.name}</h3>` : ""}<dl>${g.items.map(rowHTML).join("")}</dl></div>`;
+      }
+    }
+    html += `</section>`;
+    chips.insertAdjacentHTML("beforeend", `<a href="#${s.id}">${s.title}</a>`);
+  }
+  main.innerHTML = html + `<p class="empty" id="empty" hidden>검색 결과가 없습니다. 다른 단어로 찾아보세요.</p>`;
+  for (const el of main.querySelectorAll(".row, .row-t")) el.dataset.text = el.textContent.toLowerCase();
+}
+render();
+
+const q = document.getElementById("q");
+const count = document.getElementById("count");
+const total = main.querySelectorAll(".row, .row-t").length;
+function filter() {
+  const t = q.value.trim().toLowerCase();
+  let shown = 0;
+  for (const r of main.querySelectorAll(".row, .row-t")) {
+    const ok = !t || r.dataset.text.includes(t);
+    r.hidden = !ok; if (ok) shown++;
+  }
+  for (const g of main.querySelectorAll("[data-grp]")) g.hidden = !g.querySelector(".row:not([hidden])");
+  for (const s of main.querySelectorAll("[data-sec]")) s.hidden = !s.querySelector(".row:not([hidden]), .row-t:not([hidden])");
+  document.getElementById("empty").hidden = shown > 0;
+  count.textContent = t ? `${shown} / ${total}개` : `전체 ${total}개`;
+}
+q.addEventListener("input", filter);
+filter();
+
+const hideBtn = document.getElementById("hideBtn");
+function setHide(on) {
+  document.body.classList.toggle("hide", on);
+  hideBtn.setAttribute("aria-pressed", String(on));
+  for (const d of main.querySelectorAll(".shown")) d.classList.remove("shown");
+  try { localStorage.setItem("skm-hide", on ? "1" : "0"); } catch (e) {}
+}
+hideBtn.addEventListener("click", () => setHide(!document.body.classList.contains("hide")));
+document.getElementById("revealBtn").addEventListener("click", () => {
+  for (const d of main.querySelectorAll("dd, td.ans")) d.classList.add("shown");
+});
+main.addEventListener("click", e => {
+  const d = e.target.closest("dd, td.ans");
+  if (d && document.body.classList.contains("hide")) d.classList.toggle("shown");
+});
+try { if (localStorage.getItem("skm-hide") === "1") setHide(true); } catch (e) {}
+</script>
